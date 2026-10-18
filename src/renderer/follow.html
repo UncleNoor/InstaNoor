@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self'; script-src 'self'; img-src 'self' https: data:">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Follower Tracker</title>
+  <link rel="stylesheet" href="common.css">
+  <link rel="stylesheet" href="follow.css">
+</head>
+<body>
+  <main class="wrap">
+    <h1>Follower Tracker</h1>
+    <p class="muted">See who doesn't follow you back and who unfollowed you since your last scan. Scans go slowly on purpose so Instagram doesn't limit your account. Large accounts can take a few minutes.</p>
+    <section class="card">
+      <div class="row">
+        <button id="scan" class="primary">Scan now</button>
+        <button id="cancel" hidden>Cancel</button>
+        <span id="progress" class="muted" aria-live="polite"></span>
+      </div>
+      <p id="last" class="muted small"></p>
+      <p id="error" class="error" role="alert"></p>
+    </section>
+    <section id="results" hidden>
+      <nav class="tabs" role="tablist" id="tabs"></nav>
+      <div class="row tools">
+        <input id="filter" type="search" placeholder="Filter by name" aria-label="Filter by name">
+        <button id="copy">Copy usernames</button>
+      </div>
+      <ul id="list" class="list"></ul>
+    </section>
+  </main>
+  <script src="follow.js"></script>
+</body>
+</html>

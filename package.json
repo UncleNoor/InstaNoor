@@ -1,0 +1,30 @@
+{
+  "name": "instanoor",
+  "productName": "InstaNoor",
+  "version": "1.0.0",
+  "description": "A desktop Instagram client with an ad blocker, chronological feed, focus mode, downloads, anonymous stories, unfollower tracker and GIFs in DMs.",
+  "main": "src/main/main.js",
+  "license": "MIT",
+  "author": "UncleNoor",
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test test/*.test.js",
+    "lint": "node scripts/check-syntax.js",
+    "dist": "electron-builder",
+    "dist:win": "electron-builder --win",
+    "dist:mac": "electron-builder --mac",
+    "dist:linux": "electron-builder --linux"
+  },
+  "devDependencies": {
+    "electron": "^44.0.0",
+    "electron-builder": "^26.0.0"
+  },
+  "build": {
+    "appId": "com.unclenoor.instanoor",
+    "productName": "InstaNoor",
+    "files": ["src/**/*", "build/icon.png", "package.json"],
+    "win": { "target": ["nsis", "portable"] },
+    "mac": { "target": ["dmg", "zip"], "category": "public.app-category.social-networking" },
+    "linux": { "target": ["AppImage", "deb"], "category": "Network" }
+  }
+}
