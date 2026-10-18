@@ -93,8 +93,25 @@ article:hover .inoor-post-dl, .inoor-post-dl:focus-visible { opacity: 1; }
 .inoor-viewer { text-align: center; }
 `;
 
-function buildCss(s) {
+// Touch screens: no hover, a bottom tab bar, and a floating InstaNoor menu button.
+const MOBILE_CSS = `
+.inoor-post-dl { opacity: 1; top: 10px; right: 46px; padding: 6px 9px; }
+.inoor-fixed-dl { bottom: 84px; right: 14px; }
+.inoor-timer { bottom: auto; top: 8px; left: 50%; transform: translateX(-50%); }
+.inoor-toast { bottom: 90px; }
+.inoor-menu-btn {
+  position: fixed; right: 14px; bottom: 136px; width: 40px; height: 40px; padding: 0;
+  justify-content: center; font-size: 17px; border-radius: 50%;
+  background: linear-gradient(135deg, #0f9b8e, #3a47d5 55%, #8e2de2); border: 0; opacity: .88;
+}
+.inoor-sheet { display: grid; gap: 10px; }
+.inoor-sheet .inoor-btn { justify-content: center; padding: 13px; font-size: 15px; border-radius: 10px; }
+.inoor-card { padding: 20px; }
+`;
+
+function buildCss(s, platform) {
   const parts = [UI_CSS, themeCss(s.theme)];
+  if (platform === 'android') parts.push(MOBILE_CSS);
   if (s.hideReels) parts.push(`${NAV.reels} { display: none !important; }`);
   if (s.hideExplore) parts.push(`${NAV.explore} { display: none !important; }`);
   if (!s.downloadButtons) parts.push('.inoor-post-dl, .inoor-fixed-dl, .inoor-profile-hd { display: none !important; }');

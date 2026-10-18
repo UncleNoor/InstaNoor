@@ -1,0 +1,76 @@
+plugins {
+    id 'com.android.application'
+}
+
+// Release signing: put storeFile/storePassword/keyAlias/keyPassword in
+// android/keystore.properties (never commit it), or set the INSTANOOR_* env vars
+// in CI. Without either, release builds fall back to the debug key.
+def signingProps = new Properties()
+def signingFile = rootProject.file('keystore.properties')
+if (signingFile.exists()) signingFile.withInputStream { signingProps.load(it) }
+def signingValue = { String key, String env -> signingProps.getProperty(key) ?: System.getenv(env) }
+def hasReleaseKey = signingValue('storeFile', 'INSTANOOR_STORE_FILE') != null
+
+def appVersion = new groovy.json.JsonSlurper().parse(rootProject.file('../package.json')).version
+
+android {
+    namespace 'com.unclenoor.instanoor'
+    compileSdk 36
+
+    defaultConfig {
+        // A different application ID from Instagram's (com.instagram.android), so
+        // both apps install side by side.
+        applicationId 'com.unclenoor.instanoor'
+        minSdk 29
+        targetSdk 36
+        versionCode 1
+        versionName appVersion
+    }
+
+    signingConfigs {
+        if (hasReleaseKey) {
+            release {
+                storeFile rootProject.file(signingValue('storeFile', 'INSTANOOR_STORE_FILE'))
+                storePassword signingValue('storePassword', 'INSTANOOR_STORE_PASSWORD')
+                keyAlias signingValue('keyAlias', 'INSTANOOR_KEY_ALIAS')
+                keyPassword signingValue('keyPassword', 'INSTANOOR_KEY_PASSWORD')
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt')
+            signingConfig hasReleaseKey ? signingConfigs.release : signingConfigs.debug
+        }
+    }
+
+    buildFeatures {
+        buildConfig true
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+base {
+    archivesName = "InstaNoor-${appVersion}"
+}
+
+dependencies {
+    implementation 'androidx.webkit:webkit:1.14.0'
+}
+
+// The page scripts and tool screens are generated from ../src by Node.js.
+def buildWebAssets = tasks.register('buildWebAssets', Exec) {
+    workingDir rootProject.projectDir.parentFile
+    commandLine 'node', 'scripts/build-mobile.js'
+    inputs.dir(new File(rootProject.projectDir.parentFile, 'src'))
+    inputs.file(new File(rootProject.projectDir.parentFile, 'scripts/build-mobile.js'))
+    outputs.dir('src/main/assets')
+}
+preBuild.dependsOn buildWebAssets

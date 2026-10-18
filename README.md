@@ -1,6 +1,8 @@
 # InstaNoor
 
-A desktop Instagram client for Windows, macOS and Linux with the features people keep asking Instagram for: an ad blocker, a chronological feed, downloads, anonymous story viewing, a follower tracker, focus tools, and **GIFs in DMs**.
+An Instagram client for **Android** and for **Windows, macOS and Linux** with the features people keep asking Instagram for: an ad blocker, a chronological feed, downloads, anonymous story viewing, a follower tracker, focus tools, and **GIFs in DMs**.
+
+On Android, InstaNoor is a separate app (`com.unclenoor.instanoor`), so it installs **next to** the official Instagram app. You don't have to uninstall Instagram.
 
 InstaNoor runs the real instagram.com inside its own window and adds features on top. You log in with your normal account. Your password goes only to Instagram, and nothing is sent to any other server (except GIF searches, which go to the GIF provider you pick).
 
@@ -26,7 +28,36 @@ InstaNoor runs the real instagram.com inside its own window and adds features on
 
 All of these can be switched on or off in **Settings** (`Ctrl+,` / `Cmd+,`).
 
-## Getting started
+## Android
+
+### Install
+
+1. Copy `InstaNoor-1.0.0.apk` to your phone, or download it from the latest *Android APK* run under the repository's **Actions** tab.
+2. Open it. When Android asks, allow your browser or file manager to **install unknown apps**.
+3. Open **InstaNoor** and log in. Your Instagram app stays installed and keeps working as usual.
+
+Tap the round **N** button to open Settings, the Follower Tracker and Downloads. Downloads are saved to `Downloads/InstaNoor`. Android 10 or newer is required.
+
+To make Instagram links open in InstaNoor, tap a link and pick *InstaNoor* (or set it in *Settings → Apps → InstaNoor → Open by default*).
+
+### Build the APK
+
+Requires Node.js 20+, JDK 17+ and the Android SDK (set `sdk.dir` in `android/local.properties` or `ANDROID_HOME`).
+
+```bash
+cd android
+./gradlew assembleRelease     # → android/app/build/outputs/apk/release/
+```
+
+The build runs `scripts/build-mobile.js` first, which bundles the shared code from `src/` into the app's assets.
+
+Release builds are signed with the key in `android/keystore.properties` (`storeFile`, `storePassword`, `keyAlias`, `keyPassword`), or with the debug key if that file doesn't exist. Keep your key safe: Android only installs an update when it is signed with the same key as the installed app. In GitHub Actions, add the secrets `INSTANOOR_KEYSTORE_BASE64`, `INSTANOOR_STORE_PASSWORD`, `INSTANOOR_KEY_ALIAS` and `INSTANOOR_KEY_PASSWORD`.
+
+**Not available on Android yet:** multiple accounts in separate windows (use Instagram's own account switcher instead), desktop notifications, keyboard shortcuts and the wide layout.
+
+iPhone isn't supported. iOS doesn't allow installing apps from outside the App Store without a paid developer account and a Mac.
+
+## Desktop
 
 Requires [Node.js](https://nodejs.org) 20 or newer.
 
@@ -57,6 +88,7 @@ If Instagram ever rejects video attachments, set **Send GIFs as** to *Link*.
 ## How it works
 
 ```
+android/         Android app (Java): WebView, native bridge, downloads, file uploads
 src/
   main/          Electron main process
     main.js            windows, accounts, menu, IPC, downloads
@@ -69,11 +101,14 @@ src/
     page-hooks.js      runs inside Instagram's page: wraps fetch/XHR/WebSocket to
                        remove ads, block "seen" receipts and index media for downloads
   preload/
-    instagram.js       DOM features: hiding, download buttons, GIF button, shortcuts, focus timer
+    features.js        DOM features: hiding, download buttons, GIF button, shortcuts, focus timer
+                       (shared by desktop and Android)
+    instagram.js       desktop host for features.js
     selectors.js       every Instagram-specific selector and label, in one place
     styles.js          themes and InstaNoor's own UI styles
     helpers.js         URL parsing, shortcode → media id, etc.
-  renderer/            Settings, GIF picker and Follower Tracker windows
+  renderer/            Settings, GIF picker and Follower Tracker screens (desktop and Android)
+  mobile/              Android glue: native bridge, page script entry, tool-screen bridge
 ```
 
 Instagram changes its website often. When something stops working, it is usually a selector or label in `src/preload/selectors.js` or a pattern in `src/shared/page-hooks.js`.

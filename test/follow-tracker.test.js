@@ -31,18 +31,18 @@ test('scanFollowLists pages through both lists and retries on rate limits', asyn
   };
   const calls = { following: 0, followers: 0 };
   let limited = false;
-  const runInPage = async (code) => {
-    const kind = /\/following\//.test(code) ? 'following' : 'followers';
+  const fetchPage = async (url) => {
+    const kind = /\/following\//.test(url) ? 'following' : 'followers';
     if (kind === 'followers' && !limited) { limited = true; return { status: 429, body: '' }; }
     return { status: 200, body: JSON.stringify(pages[kind][calls[kind]++]) };
   };
   const progress = [];
-  const snap = await scanFollowLists('42', { runInPage, onProgress: (p) => progress.push(p), isCancelled: () => false, delay: async () => {} });
+  const snap = await scanFollowLists('42', { fetchPage, onProgress: (p) => progress.push(p), isCancelled: () => false, delay: async () => {} });
   assert.deepStrictEqual(snap.following.map((x) => x.username), ['a', 'b']);
   assert.deepStrictEqual(snap.followers.map((x) => x.username), ['c']);
   assert.ok(progress.some((p) => p.waiting));
 });
 
 test('scanFollowLists stops when cancelled', async () => {
-  await assert.rejects(scanFollowLists('1', { runInPage: async () => ({}), onProgress() {}, isCancelled: () => true, delay: async () => {} }), /cancelled/);
+  await assert.rejects(scanFollowLists('1', { fetchPage: async () => ({}), onProgress() {}, isCancelled: () => true, delay: async () => {} }), /cancelled/);
 });

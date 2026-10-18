@@ -3,3 +3,12 @@ dist/
 out/
 *.log
 .DS_Store
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/keystore.properties
+android/*.jks
+android/*.keystore
+# Generated from src/ by scripts/build-mobile.js
+android/app/src/main/assets/

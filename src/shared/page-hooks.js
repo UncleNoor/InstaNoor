@@ -360,5 +360,5 @@ function buildPageScript(cfg) {
 
 module.exports = {
   isAdNode, scrubAds, extractMedia, classifySeenRequest, parseIgBody, serializeIgBody,
-  processIgBody, buildPageScript,
+  processIgBody, buildPageScript, installPageHooks,
 };

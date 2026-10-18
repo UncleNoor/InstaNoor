@@ -59,15 +59,16 @@ function listUrl(userId, kind, maxId) {
 
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
-// runInPage(code) -> Promise<{status, body}>; onProgress({kind, count}); isCancelled() -> bool
-async function scanFollowLists(userId, { runInPage, onProgress, isCancelled, delay = wait }) {
+// fetchPage(url) -> Promise<{status, body}> using the Instagram session's cookies;
+// onProgress({kind, count}); isCancelled() -> bool
+async function scanFollowLists(userId, { fetchPage, onProgress, isCancelled, delay = wait }) {
   const out = { takenAt: Date.now(), userId: String(userId), followers: [], following: [] };
   for (const kind of ['following', 'followers']) {
     let maxId = null;
     let retries = 0;
     for (;;) {
       if (isCancelled()) throw new Error('Scan cancelled.');
-      const { status, body } = await runInPage(pageFetchSnippet(listUrl(userId, kind, maxId)));
+      const { status, body } = await fetchPage(listUrl(userId, kind, maxId));
       if (status === 429 || status === 401 || /please wait/i.test(body || '')) {
         if (++retries > 3) throw new Error('Instagram is rate-limiting requests. Try again in an hour.');
         onProgress({ kind, count: out[kind].length, waiting: true });
@@ -88,4 +89,4 @@ async function scanFollowLists(userId, { runInPage, onProgress, isCancelled, del
   return out;
 }
 
-module.exports = { diffSnapshots, scanFollowLists, listUrl, slimUser };
+module.exports = { diffSnapshots, scanFollowLists, listUrl, slimUser, pageFetchSnippet, IG_APP_ID };

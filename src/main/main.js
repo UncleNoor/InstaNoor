@@ -9,7 +9,7 @@ const { Store, todayKey } = require('./store');
 const { SCHEMA } = require('../shared/settings-schema');
 const { blockReason } = require('./request-filter');
 const { searchGifs } = require('./gif-providers');
-const { scanFollowLists, diffSnapshots } = require('./follow-tracker');
+const { scanFollowLists, diffSnapshots, pageFetchSnippet } = require('./follow-tracker');
 
 const IG_HOME = 'https://www.instagram.com/';
 // Hosts that may load inside the app window. Everything else opens in the browser.
@@ -507,7 +507,7 @@ function registerIpc() {
     const reply = e.sender;
     try {
       const snap = await scanFollowLists(userId, {
-        runInPage: (code) => win.webContents.executeJavaScript(code, true),
+        fetchPage: (url) => win.webContents.executeJavaScript(pageFetchSnippet(url), true),
         onProgress: (p) => { if (!reply.isDestroyed()) reply.send('follow:progress', p); },
         isCancelled: () => followScan.cancelled || win.isDestroyed(),
       });
